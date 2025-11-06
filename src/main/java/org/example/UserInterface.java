@@ -31,6 +31,7 @@ public class UserInterface {
                 case 7 -> processGetAllVehiclesRequest();
                 case 8 -> processAddVehicleRequest();
                 case 9 -> processRemoveVehicleRequest();
+                case 10 -> sellOrLeaseVehicle();
                 case 99 -> {
                     running = false;
                     System.out.println("Thank you.");
@@ -61,6 +62,7 @@ public class UserInterface {
         System.out.println("7. List all vehicles");
         System.out.println("8. Add a vehicle");
         System.out.println("9. Remove a vehicle");
+        System.out.println("10. Sell/Lease a vehicle");
         System.out.println("99. Exit");
         System.out.println("Enter choice: ");
     }
@@ -168,5 +170,53 @@ public class UserInterface {
     private String readString(String prompt) {
         System.out.println(prompt);
         return scanner.nextLine().trim();
+    }
+
+    private void sellOrLeaseVehicle() {
+        System.out.println("Enter Vin of vehicle: ");
+        String vin = scanner.nextLine();
+        Vehicle vehicle = dealership.getVehicleByVin(Integer.parseInt(vin));
+
+        if (vehicle == null) {
+            System.out.println("Vehicle not found.");
+            return;
+        }
+
+        System.out.println("Enter customer name: ");
+        String name = scanner.nextLine();
+        System.out.println("Enter customer email: ");
+        String email = scanner.nextLine();
+
+        System.out.println("Please enter the letter (S) for Sale or (L) for Lease: ");
+        String type = scanner.nextLine().toUpperCase();
+
+        ContractFileManager contractFileManager = new ContractFileManager();
+
+        if (type.equals("S")) {
+            System.out.println("Finance the vehicle? Please enter the letter (Y) for Yes or (N) for No: ");
+            boolean finance = scanner.nextLine().equalsIgnoreCase("Y");
+
+            SalesContract contract = new SalesContract(getToday(), name, email, vehicle,finance);
+            contractFileManager.saveContract(contract);
+            dealership.removeVehicle(vehicle);
+
+            System.out.println("Sale recorded successfully.");
+        } else if (type.equals("L")) {
+            int currentYear = java.time.LocalDate.now().getYear();
+            if (currentYear - vehicle.getYear() > 3) {
+                System.out.println("You cannot lease a vehicle over 3 years old.");
+                return;
+            }
+
+            LeaseContract contract = new LeaseContract(getToday(), name, email, vehicle);
+            contractFileManager.saveContract(contract);
+            dealership.removeVehicle(vehicle);
+
+            System.out.println("Lease recorded successfully.");
+        }
+    }
+
+    private String getToday() {
+        return java.time.LocalDate.now().toString().replace("-", "");
     }
 }

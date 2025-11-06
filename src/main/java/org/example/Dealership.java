@@ -43,6 +43,14 @@ public class Dealership {
     public void addVehicle(Vehicle vehicle) {
         inventory.add(vehicle);
     }
+    public Vehicle getVehicleByVin(int vin) {
+        for (Vehicle vehicle : inventory) {
+            if (vehicle.getVin() == vin) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
 
     public List<Vehicle> getVehiclesByPrice(double min, double max) {
         List<Vehicle> matches = new ArrayList<>();
@@ -109,5 +117,9 @@ public class Dealership {
     }
     public List<Vehicle> getAllVehicles() {
         return(inventory);
+    }
+
+    public void removeVehicle(Vehicle vehicle) {
+        inventory.remove(vehicle);
     }
 }
